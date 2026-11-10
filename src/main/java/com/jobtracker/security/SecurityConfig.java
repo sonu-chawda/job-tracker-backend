@@ -1,7 +1,9 @@
 package com.jobtracker.security;
 
+import java.util.Arrays;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -17,6 +19,9 @@ import org.springframework.web.cors.*;
 @Configuration @EnableMethodSecurity @RequiredArgsConstructor
 public class SecurityConfig {
     private final JwtAuthFilter jwtAuthFilter;
+
+    // Comma separated list, deploy par live frontend URL yahan aata hai (CORS_ORIGINS env variable)
+    @Value("${app.cors.allowed-origins}") private String allowedOrigins;
 
     @Bean
     SecurityFilterChain chain(HttpSecurity http) throws Exception {
@@ -36,7 +41,7 @@ public class SecurityConfig {
     @Bean
     CorsConfigurationSource corsSource() {
         var cfg = new CorsConfiguration();
-        cfg.setAllowedOrigins(List.of("http://localhost:5173", "http://localhost:3000"));
+        cfg.setAllowedOrigins(Arrays.stream(allowedOrigins.split(",")).map(String::trim).toList());
         cfg.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         cfg.setAllowedHeaders(List.of("*"));
         var src = new UrlBasedCorsConfigurationSource();
